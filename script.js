@@ -5,40 +5,48 @@ const input = document.querySelector("input"),
   gameModal = document.querySelector(".game-modal"),
   playAgainBtn = gameModal.querySelector("button");
 
+let randomNum = generateRandomNumber(1, 100),
+  chance = 10;
+
 input.focus();
 
-let randomNum = Math.floor(Math.random() * 100), inputValue;
-chance = 10;
+function generateRandomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
-const gameOver = (isVictory) => {
-  // After game complete.. showing modal with relevant details
+function updateUI(message, color) {
+  guess.textContent = message;
+  guess.style.color = color;
+  remainChances.textContent = chance;
+}
+
+function gameOver(isVictory) {
   const modalText = isVictory ? `You found the number:` : "The correct number was:";
-  gameModal.querySelector("img").src = `images/${
-    isVictory ? "victory" : "lost"
-  }.gif`;
-  gameModal.querySelector("h4").innerText = isVictory
-    ? "Congrats!"
-    : "Game Over!";
-  gameModal.querySelector("p").innerHTML = `${modalText} <b>${randomNum}</b>`;
+  const resultImage = isVictory ? "victory" : "lost";
+  const resultText = isVictory ? "Congrats!" : "Game Over!";
+  const resultNumber = isVictory ? randomNum : "";
+
+  gameModal.querySelector("img").src = `images/${resultImage}.gif`;
+  gameModal.querySelector("h4").innerText = resultText;
+  gameModal.querySelector("p").innerHTML = `${modalText} <b>${resultNumber}</b>`;
   gameModal.classList.add("show");
-};
+}
 
 checkButton.addEventListener("click", () => {
   chance--;
-  inputValue = input.value;
-  if (inputValue == randomNum) {
+  const inputValue = parseInt(input.value);
+
+  if (inputValue === randomNum) {
     gameOver(true);
   } else if (inputValue > randomNum && inputValue < 100) {
-    [guess.textContent, remainChances.textContent] = ["Your guess is high", chance];
-    guess.style.color = "#333";
+    updateUI("Your guess is high", "#333");
   } else if (inputValue < randomNum && inputValue > 0) {
-    [guess.textContent, remainChances.textContent] = ["Your guess is low", chance];
-    guess.style.color = "#333";
+    updateUI("Your guess is low", "#333");
   } else {
-    [guess.textContent, remainChances.textContent] = ["Your number is invalid", chance];
-    guess.style.color = "#DE0611";
+    updateUI("Your number is invalid", "#DE0611");
   }
-  if (chance == 0) {
+
+  if (chance === 0) {
     gameOver(false);
   }
   if (chance < 0) {
@@ -47,16 +55,10 @@ checkButton.addEventListener("click", () => {
 });
 
 playAgainBtn.addEventListener("click", () => {
-  // Resetting variables
-  randomNum = Math.floor(Math.random() * 100);
+  randomNum = generateRandomNumber(1, 100);
   chance = 10;
-  
-  // Resetting UI elements
-  input.value = "";
-  guess.textContent = "";
-  remainChances.textContent = chance;
-  guess.style.color = "#333";
 
-  // Hide the modal if it's currently shown
+  input.value = "";
+  updateUI("", "#333");
   gameModal.classList.remove("show");
 });
